@@ -12,6 +12,11 @@ export function addTotalsToAccsUl(dom) {
             accTotal += set.txns[txnIdx][accIdx]
         })
         accTotalSpans[accIdx].innerHTML = accTotal;
+        if (accTotal >= 0) {
+            accTotalSpans[accIdx].classList.remove("negative");
+        } else {
+            accTotalSpans[accIdx].classList.add("negative");
+        }
         console.log(acc.accName);
     })
 }

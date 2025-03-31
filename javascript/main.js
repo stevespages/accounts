@@ -4,6 +4,7 @@ import { addNewAcc } from "./modules/add-new-acc.js";
 import { addNewSet } from "./modules/add-new-set.js";
 import { addTotalsToAccsUl } from "./modules/add-totals-to-accs-ul.js";
 import { cancelTxn } from "./modules/cancel-txn.js";
+import { createImportDialog } from "./modules/create-import-dialog.js";
 import { dom } from "./modules/dom.js";
 import { hideFilteredAccLis } from "./modules/hide-filtered-acc-lis.js";
 import { makeListOfAllSets } from "./modules/make-list-of-all-sets.js";
@@ -30,6 +31,7 @@ dom.els.addAcc_d.addEventListener("click", event => {
     if (event.target.id === "add-acc_d-ok_btn") {
         addNewAcc(dom);
         populateAccsUl(dom);
+        addTotalsToAccsUl(dom);
         dom.showDiv(["set_d"]);
     }
 })
@@ -59,9 +61,25 @@ dom.els.allSets_d.addEventListener("click", event => {
     }
 })
 
+dom.els.deleteSet_d.addEventListener("click", event => {
+    if (event.target.id === "delete-set_d-cancel_btn") {
+        dom.showDiv(["set_d"]);
+    }
+    if (event.target.id === "delete-set_d-ok_btn") {
+        console.log("delete it!")
+        const setsOfAccs = JSON.parse(localStorage.getItem("setsOfAccs"));
+        const setIdx = dom.els.set_d_h1.dataset.setIdx;
+        setsOfAccs.splice(setIdx, 1);
+        localStorage.setItem("setsOfAccs", JSON.stringify(setsOfAccs));
+        makeListOfAllSets(dom);
+        dom.showDiv(["allSets_d"])
+    }
+})
+
 dom.els.importCsv_d.addEventListener("click", (event) => {
     if (event.target.id === "import-csv_d-cancel_btn") {
         dom.els.importCsv_dUploadCsv_inp.value = "";
+        dom.els.importCsv_dHeadings_dl.innerHTML = "";
         dom.showDiv(["set_d"]);
     }
 })
@@ -70,9 +88,7 @@ dom.els.importCsv_dUploadCsv_inp.addEventListener("change", () => {
     const file = dom.els.importCsv_dUploadCsv_inp.files[0];
     const reader = new FileReader();
     reader.addEventListener("load", () => {
-        const uploadedCsv = reader.result;
-        console.log(uploadedCsv);
-        console.log("setIdx", dom.els.set_d_h1.dataset.setIdx);
+        createImportDialog(dom, reader.result);
     });
     reader.readAsText(file);
 });
@@ -94,6 +110,15 @@ dom.els.set_d.addEventListener("click", event => {
     }
     if (event.target.id === "set_d-cancel-txn_btn") {
         cancelTxn(dom);
+    }
+    if (event.target.id === "set_d-delete_btn") {
+        const setsOfAccs = JSON.parse(localStorage.getItem("setsOfAccs"));
+        const setIdx = dom.els.set_d_h1.dataset.setIdx;
+        const setName = setsOfAccs[setIdx].setName;
+        const message = "Really delete " + setName + "?";
+        const messageTextNode = document.createTextNode(message);
+        dom.els.deleteSet_dReallyDelete_p.append(messageTextNode);
+        dom.showDiv(["deleteSet_d"])
     }
     if (event.target.id === "set_d-import-csv_btn") {
         dom.showDiv(["importCsv_d"]);

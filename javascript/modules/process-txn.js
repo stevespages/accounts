@@ -12,11 +12,15 @@ export function processTxn(dom) {
     })
     if (unbalancedAmount !== 0) {
         txn[0] = unbalancedAmount;
+
     }
     setsOfAccs
     const txnsLength = setsOfAccs[setIdx].txns.push(txn);
     accIdxs.forEach(idx => {
         setsOfAccs[setIdx].accs[idx].txns.push(txnsLength - 1);
+        if (unbalancedAmount !== 0) {
+            setsOfAccs[setIdx].accs[0].txns.push(txnsLength - 1);
+        }
     });
     localStorage.setItem("setsOfAccs", JSON.stringify(setsOfAccs))
 }
