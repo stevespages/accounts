@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="module" src="./javascript/main.js"></script>
+    <style>
+        .hide {
+            display: none;
+        }
+        .inactive {
+            color: grey;
+        }
+    </style>
+    <title>Document</title>
+</head>
+<body>
+    <div id="add-acc_d">
+        <h1 id="add-acc_d_h1"></h1>
+        <h2>Add an Account</h2>
+        <button id="add-acc_d-cancel_btn">Cancel</button>
+        <label>Name of Account
+            <input id="add-acc_d-acc-name_inp" type="text">
+        </label>
+        <button id="add-acc_d-ok_btn">OK</button>
+    </div>
+    <div id="add-new-set_d">
+        <button id="add-new-set_d-cancel_btn">Cancel</button>
+        <label>Name of New Set of Accounts
+            <input id="add-new-set_d-set-name_inp" type="text">
+        </label>
+        <!-- add inputs for start and end dates -->
+        <button id="add-new-set_d-ok_btn">OK</button>
+    </div>
+    <div id="all-sets_d">
+        <h1>Sets of Accounts</h1>
+        <button id="all-sets_d-new-set_btn">new set</button>
+        <ul id="all-sets_d_ul"></ul>
+    </div>
+    <div id="import-csv_d">
+        <h1>Import CSV</h1>
+        <button id="import-csv_d-cancel_btn">Cancel</button>
+        <label>Upload CSV File
+            <input id="import-csv_d-upload-csv_inp" type="file">
+        </label>
+    </div>
+    <div id="set_d">
+        <h1 id="set_d_h1"></h1>
+        <button id="set_d-cancel_btn">Cancel</button>
+        <button id="set_d-add-acc_btn">Add Account</button>
+        <button id="set_d-import-csv_btn">Import CSV</button>
+        <ul id="set_d-txn_ul">
+            <li id="set_d-txn_ul-unbalanced-amount_li">
+                <span id="set_d-txn_ul-unbalanced-amount_li_span"></span>
+            </li>
+        </ul>
+        <button id="set_d-cancel-txn_btn">Cancel txn</button>
+        <button id="set_d-ok-txn_btn">OK txn</button>
+        <input id="set_d-filter-accs_inp" type="text" placeholder="filter">
+        <ul id="set_d-accs_ul"></ul>
+    </div>
+</body>
+</html>
