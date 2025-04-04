@@ -20,9 +20,9 @@ export function addNewSet(dom) {
     ];
     set.txns = [];
 
-    const setsOfAccs = JSON.parse(localStorage.getItem("setsOfAccs"));
+    const accounts = JSON.parse(localStorage.getItem("accounts"));
     
-    setsOfAccs.push(set);
+    accounts.sets.push(set);
 
-    localStorage.setItem("setsOfAccs", JSON.stringify(setsOfAccs));
+    localStorage.setItem("accounts", JSON.stringify(accounts));
 }

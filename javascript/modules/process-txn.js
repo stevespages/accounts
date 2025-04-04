@@ -1,26 +1,34 @@
 export function processTxn(dom) {
-    const setsOfAccs = JSON.parse(localStorage.getItem("setsOfAccs"));
-    const setIdx = dom.els.set_d_h1.dataset.setIdx;
-    const txn = {};
+    const accounts = JSON.parse(localStorage.getItem("accounts"));
+    const setIdx = accounts.activeSetIdx;
+    const txn = {
+        accsAndAmounts: {},
+    };
+    txn.timestamp = Date.now();
+    txn.date = dom.els.set_dTxn_ulDate_li_inp.value;
+    txn.description = dom.els.set_dTxn_ulDescription_li_inp.value;
     const accIdxs = [];
     let unbalancedAmount = 0;
     const accAmountInps = document.querySelectorAll(".acc-amount-inp");
     Array.from(accAmountInps).forEach(inp => {
-        txn[inp.dataset.accIdx] = Number(inp.value);
-        unbalancedAmount += Number(inp.value);
-        accIdxs.push(inp.dataset.accIdx);
+        if (Number(inp.value) !== 0) {
+            txn.accsAndAmounts[inp.dataset.accIdx] = Number(inp.value);
+            unbalancedAmount += Number(inp.value);
+            accIdxs.push(inp.dataset.accIdx);
+        }
     })
-    if (unbalancedAmount !== 0) {
-        txn[0] = unbalancedAmount;
-
-    }
-    setsOfAccs
-    const txnsLength = setsOfAccs[setIdx].txns.push(txn);
-    accIdxs.forEach(idx => {
-        setsOfAccs[setIdx].accs[idx].txns.push(txnsLength - 1);
+    if (unbalancedAmount) {
         if (unbalancedAmount !== 0) {
-            setsOfAccs[setIdx].accs[0].txns.push(txnsLength - 1);
+            txn.accsAndAmounts[0] = unbalancedAmount;
+
+        }
+    }
+    const txnsLength = accounts.sets[setIdx].txns.push(txn);
+    accIdxs.forEach(idx => {
+        accounts.sets[setIdx].accs[idx].txns.push(txnsLength - 1);
+        if (unbalancedAmount !== 0) {
+            accounts.sets[setIdx].accs[0].txns.push(txnsLength - 1);
         }
     });
-    localStorage.setItem("setsOfAccs", JSON.stringify(setsOfAccs))
+    localStorage.setItem("accounts", JSON.stringify(accounts))
 }

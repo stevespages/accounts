@@ -16,6 +16,8 @@ New accounts are objects pushed to the `set.accs` array. These array elements mu
 
 `set.accs[0]` is an account called `unbalanced. It can not be directly changed by the user. It balances the otherwise unbalanced transactions. If the books are balanced it should have a value of zero.
 
+A user should not create an account called "unbalanced", "date" or "description".
+
 In the code below for `setsOfAccs`, a single set of accounts called "Steve Greig" can be seen. It contains three accounts: `unbalanced` which can not be removed or directly modified by the user, "Bank" and "cash". A transaction was entered at the time indicated by the timestamp with a date given for the transaction itself and an array called `accsAndAmounts` which records the index of accounts involved in the transaction as keys with the amount for that accounts recorded as the value.
 
 It can be seen that `accs[0]`, which is the `unbalanced` account, has an empty `txns` array. This is because there are no unbalanced transactions.
@@ -27,61 +29,79 @@ It can be seen that `accs[0]`, which is the `unbalanced` account, has an empty `
 `set.txns[0]` is an object describing a single transaction. It indicates that `accs[1]` was debited with £100.00 and `accs[2]` was credited with £100.00. In other words £100.00 was withdrawn from "Bank" and therefore "cash" increased by £100.00.
 
 ```
-setsOfAccs = [
-    {
-        nameOfAcc: "Steve Greig",
-        startDay: 1,
-        startMonth: 4,
-        endDay: 31,
-        endMonth: 3,
-        accs: [
-            {
-                accName: "unbalanced",
-                status: "active",
-                txns: [],
-            },
-            {
-                accName: "Bank",
-                status: "active",
-                txns: [0]
-            },
-            {
-                accName: "cash",
-                status: "active",
-                txns: [0]
-            },
-        ],
-        txns: [
-            {
-                timestamp: 1743432091
-                date: <YYYY-MM-DD>
-                description: <blah blah>
-                accsAndAmounts: [
-                    1: -100.00,
-                    2: +100.00,
-                ]
-            },
-        ],
-    }
-]
+accs = {
+    activeSetIdx: <setIdx>,
+    uploadedCsv: <csv>
+    sets: [
+        {
+            nameOfAcc: "Steve Greig",
+            startDay: 1,
+            startMonth: 4,
+            endDay: 31,
+            endMonth: 3,
+            temporaryCsv: <temporary csv>
+            accs: [
+                {
+                    accName: "unbalanced",
+                    status: "active",
+                    txns: [],
+                },
+                {
+                    accName: "Bank",
+                    status: "active",
+                    txns: [0]
+                },
+                {
+                    accName: "cash",
+                    status: "active",
+                    txns: [0]
+                },
+            ],
+            txns: [
+                {
+                    timestamp: 1743432091
+                    date: <YYYY-MM-DD>
+                    description: <blah blah>
+                    accsAndAmounts: [
+                        1: -100.00,
+                        2: +100.00,
+                    ]
+                },
+            ],
+        },
+        etc.
+    ],
+}
 ```
 
 ## divs
 
 * `addAcc_d`
 
-* `addNewSet_d`
+* `addNewSet_d` > `addSet_d
 
-* `all-sets_div`
+* `all-sets_d`
 
     landing div for the web app. Has a list of the user's sets of accounts and a "new set" button.
 
+* `all-txns_div`
+
+    Every transaction in the set of accounts will be shown in chronological order which is their order in the `txns` array.
+
+* `delete-set_d`
+
 * `importCsv_d`
+
+* `importCsvView_d`
 
 * `set_d`
 
     landing div for an individual set of accounts. Shows a list of the accounts in the set. A text input allows filtering. Clicking on an account name causes the name of the account to appear above the list with an input box next to it for entering an amount. The amount entered but with opposite sign appears as the user types. Clicking on another account brings this to the top with an input box for the user to enter an amount. Any number of accounts can be involved. The transaction is recorded in the `txns` array after OK btn clicked.
 
-* `all-txns_div`
+## Notes
 
-    Every transaction in the set of accounts will be shown in chronological order which is their order in the `txns` array.
+Restrict setting `setsOfAccs` localStorage to `main.js`. Pass the minimum necessary part of `setsOfAccs` to functions so it is clear what the function is operating on and able to modify. If the function modifies part of it then return that and store in localStorage from `main.js`.
+
+OR only assign `setsOfAccs` from localStorage to a variable from within a function and (therefore necessarily) only set it to localStorage from within functions?
+
+Instead of referring to `dom.els.set_dH1.dataset.setIdx` to get the index of the current set why not store this in `setsOfAccs`?

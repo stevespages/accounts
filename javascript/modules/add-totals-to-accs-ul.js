@@ -1,7 +1,7 @@
 export function addTotalsToAccsUl(dom) {
-    const setIdx = dom.els.set_d_h1.dataset.setIdx;
-    const setsOfAccs = JSON.parse(localStorage.getItem("setsOfAccs"));
-    const set = setsOfAccs[setIdx];
+    const accounts = JSON.parse(localStorage.getItem("accounts"));
+    const setIdx = accounts.activeSetIdx;
+    const set = accounts.sets[setIdx];
     const accTotalSpans = 
         Array.from(document.querySelectorAll(".acc-total-span"));
 
@@ -9,7 +9,9 @@ export function addTotalsToAccsUl(dom) {
         let accTotal = 0;
  
         acc.txns.forEach(txnIdx => {
-            accTotal += set.txns[txnIdx][accIdx]
+            console.log("txnIdx", txnIdx)
+            accTotal += Number(set.txns[txnIdx].accsAndAmounts[accIdx]);
+            console.log("accTotal", accTotal)
         })
         accTotalSpans[accIdx].innerHTML = accTotal;
         if (accTotal >= 0) {

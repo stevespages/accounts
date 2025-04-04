@@ -1,6 +1,7 @@
 export function populateAccsUl(dom) {
-    const setsOfAccs = JSON.parse(localStorage.getItem("setsOfAccs"));
-    const set = setsOfAccs[dom.els.set_d_h1.dataset.setIdx];
+    const accounts = JSON.parse(localStorage.getItem("accounts"));
+    const setIdx = accounts.activeSetIdx;
+    const set = accounts.sets[setIdx];
     dom.els.set_dAccs_ul.innerHTML = "";
     set.accs.forEach((acc, accIdx) => {
         const li = document.createElement("li");

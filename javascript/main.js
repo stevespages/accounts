@@ -1,39 +1,70 @@
 import { addAccToTxnUl } from "./modules/add-acc-to-txn-ul.js";
-import { addDataToH1 } from "./modules/add-data-to-h1.js";
+import { addCsvInpClasses } from "./modules/add-csv-inp-classes.js";
 import { addNewAcc } from "./modules/add-new-acc.js";
 import { addNewSet } from "./modules/add-new-set.js";
 import { addTotalsToAccsUl } from "./modules/add-totals-to-accs-ul.js";
+import { accNameExists } from "./modules/acc-name-exists.js";
+import { accNameToAccIdx } from "./modules/acc-name-to-acc-idx.js";
+import { appendToSet_d_h1 } from "./modules/append-to-set_d_h1.js";
+import { assignActiveSetIdx } from "./modules/assign-active-set-idx.js";
+import { cancelSet } from "./modules/cancel-set.js";
 import { cancelTxn } from "./modules/cancel-txn.js";
+import { createAccsFromCsv } from "./modules/create-accs-from-csv.js";
 import { createImportDialog } from "./modules/create-import-dialog.js";
+import { createLookUpColTable } from "./modules/create-look-up-col-table.js";
+import { deleteSet } from "./modules/delete-set.js";
+import { deleteTemporaryCsv } from "./modules/delete-temporary-csv.js";
 import { dom } from "./modules/dom.js";
 import { hideFilteredAccLis } from "./modules/hide-filtered-acc-lis.js";
+import { impCsvIgnore } from "./modules/imp-csv-ignore.js";
+import { isValidAccName } from "./modules/is-valid-acc-name.js";
 import { makeListOfAllSets } from "./modules/make-list-of-all-sets.js";
+import { reallyDeleteSetMssg } from "./modules/really-delete-set-mssg.js";
+import { saveImportedCsv } from "./modules/save-imported-csv.js";
 import { populateAccsUl } from "./modules/populate-accs-ul.js";
 import { processTxn } from "./modules/process-txn.js";
 
 dom.createElVars();
 dom.consoleLogEls();
 
-if (!localStorage.getItem("setsOfAccs")) {
-    localStorage.setItem("setsOfAccs", JSON.stringify([]));
+if (!localStorage.getItem("accounts")) {
+    localStorage.setItem("accounts", JSON.stringify(
+        {
+            activeSetIdx: null,
+            sets: [],
+            temporaryCsv: null,
+        }
+    ));
 }
 
+console.log("accounts", JSON.parse(localStorage.getItem("accounts")));
+
+cancelSet();
+deleteTemporaryCsv();
 makeListOfAllSets(dom);
 
 dom.showDiv(["allSets_d"]);
-
-const setsOfAccs = JSON.parse(localStorage.getItem("setsOfAccs"));
 
 dom.els.addAcc_d.addEventListener("click", event => {
     if (event.target.id === "add-acc_d-cancel_btn") {
         dom.showDiv(["set_d"]);
     }
     if (event.target.id === "add-acc_d-ok_btn") {
-        addNewAcc(dom);
-        populateAccsUl(dom);
-        addTotalsToAccsUl(dom);
-        dom.showDiv(["set_d"]);
+        const putativeAccName = dom.els.addAcc_dAccName_inp.value;
+        if (!accNameExists(putativeAccName) &&
+            !["date", "description"].includes(putativeAccName.toLowerCase)){
+            if (isValidAccName(putativeAccName)) {
+                addNewAcc(putativeAccName);
+                populateAccsUl(dom);
+                addTotalsToAccsUl(dom);
+                dom.showDiv(["set_d"]);
+            }
+        }
     }
+})
+
+dom.els.addAcc_dAccName_inp.addEventListener("input", event => {
+        addCsvInpClasses(event.target, accNameExists);
 })
 
 dom.els.addNewSet_d.addEventListener("click", event => {
@@ -49,7 +80,8 @@ dom.els.addNewSet_d.addEventListener("click", event => {
 
 dom.els.allSets_d.addEventListener("click", event => {
     if (event.target.classList.contains("acc-set-li")) {
-        addDataToH1(dom, event.target.dataset.setIdx);
+        assignActiveSetIdx(event.target.dataset.setIdx);
+        appendToSet_d_h1(dom);
         populateAccsUl(dom);
         addTotalsToAccsUl(dom);
         cancelTxn(dom);
@@ -66,31 +98,96 @@ dom.els.deleteSet_d.addEventListener("click", event => {
         dom.showDiv(["set_d"]);
     }
     if (event.target.id === "delete-set_d-ok_btn") {
-        console.log("delete it!")
-        const setsOfAccs = JSON.parse(localStorage.getItem("setsOfAccs"));
-        const setIdx = dom.els.set_d_h1.dataset.setIdx;
-        setsOfAccs.splice(setIdx, 1);
-        localStorage.setItem("setsOfAccs", JSON.stringify(setsOfAccs));
+        deleteSet();
+        cancelSet();
         makeListOfAllSets(dom);
         dom.showDiv(["allSets_d"])
     }
 })
 
 dom.els.importCsv_d.addEventListener("click", (event) => {
+    if (event.target.classList.contains("import-csv-heading-ignore-btn")) {
+        impCsvIgnore(event.target);
+    }
+    if (event.target.classList.contains("import-csv-heading-view-btn")) {
+
+    }
     if (event.target.id === "import-csv_d-cancel_btn") {
         dom.els.importCsv_dUploadCsv_inp.value = "";
         dom.els.importCsv_dHeadings_dl.innerHTML = "";
         dom.showDiv(["set_d"]);
     }
+    if (event.target.id === "import-csv_d-import-csv_btn") {
+        createAccsFromCsv(dom, addNewAcc);
+        const lookUpColTable = createLookUpColTable(accNameToAccIdx);
+        console.log("lookUpColTable", lookUpColTable)
+        //createTxnsFromCsv(lookUpColTable);
+
+        /*
+        accounts.temporaryCsv.forEach((row, idx) => {
+            // accIdxs is an array of the accIdx for each account involved in
+            // transaction. It must include "0" if the unbalanced account has
+            // a non zero value for the transaction
+            const accIdxs = [];
+            // ignore the heading row
+            if (idx === 0) {
+                return;
+            }
+            const txn = {
+                accsAndAmounts: {},
+            };
+            txn.timestamp = Date.now();
+            newHeadings.forEach((heading, headingIdx) => {
+                // ignore null headings according to user
+                if (!heading) {
+                    return;
+                }
+                if (heading.toLowerCase() === "date") {
+                    txn.date = row[headingIdx];
+                    return;
+                }
+                if (heading.toLowerCase() === "description") {
+                    txn.description = row[headingIdx];
+                    return;
+                }
+                let accIdx = getAccIdx(heading);
+                if (!accIdx) {
+                    addNewAcc(dom, heading);
+                }
+                accIdx = getAccIdx(heading);
+                accIdxs.push(accIdx);
+                txn.accsAndAmounts[accIdx] = row[headingIdx];
+            })
+            accounts = JSON.parse(localStorage.getItem("accounts"));
+            const txnsIdx = accounts.sets[setIdx].txns.push(txn) - 1;
+            accIdxs.forEach(accIdx => {
+                accounts.sets[setIdx].accs[accIdx].txns.push(txnsIdx);
+            })
+            */
+            /*
+            txn.forEach(txnAcc => {
+                const accIdx = Object.keys(txnAcc)[0];
+                set.accs[accIdx].txns.push(txnsIdx);
+            })
+            */
+        /*
+        })
+        localStorage.setItem("accounts", JSON.stringify(accounts));
+        */
+    }
+
+    if (event.target.id === "import-csv_d-show-csv_btn") {
+        event.target.classList.add("hide");
+        createImportDialog(dom, addCsvInpClasses, accNameExists);
+    }
 })
 
+dom.els.importCsv_dHeadings_dl.addEventListener("input", event => {
+    addCsvInpClasses(event.target, accNameExists);
+});
+
 dom.els.importCsv_dUploadCsv_inp.addEventListener("change", () => {
-    const file = dom.els.importCsv_dUploadCsv_inp.files[0];
-    const reader = new FileReader();
-    reader.addEventListener("load", () => {
-        createImportDialog(dom, reader.result);
-    });
-    reader.readAsText(file);
+    saveImportedCsv(dom.els.importCsv_dUploadCsv_inp.files[0], dom);
 });
 
 dom.els.set_d.addEventListener("click", event => {
@@ -106,21 +203,18 @@ dom.els.set_d.addEventListener("click", event => {
         dom.showDiv(["addAcc_d"]);
     }
     if (event.target.id === "set_d-cancel_btn") {
+        cancelSet();
         dom.showDiv(["allSets_d"]);
     }
     if (event.target.id === "set_d-cancel-txn_btn") {
         cancelTxn(dom);
     }
     if (event.target.id === "set_d-delete_btn") {
-        const setsOfAccs = JSON.parse(localStorage.getItem("setsOfAccs"));
-        const setIdx = dom.els.set_d_h1.dataset.setIdx;
-        const setName = setsOfAccs[setIdx].setName;
-        const message = "Really delete " + setName + "?";
-        const messageTextNode = document.createTextNode(message);
-        dom.els.deleteSet_dReallyDelete_p.append(messageTextNode);
+        reallyDeleteSetMssg(dom);
         dom.showDiv(["deleteSet_d"])
     }
     if (event.target.id === "set_d-import-csv_btn") {
+        dom.els.importCsv_dImportCsv_btn.classList.add("hide");
         dom.showDiv(["importCsv_d"]);
     }
     if (event.target.id === "set_d-ok-txn_btn") {

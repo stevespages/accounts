@@ -1,9 +1,9 @@
 export function addAccToTxnUl(dom, accIdx) {
     dom.els.set_dTxn_ul.classList.remove("hide");
     dom.els.set_dTxn_ulDate_li_inp.value = getDateToday();
-    const setsOfAccs = JSON.parse(localStorage.getItem("setsOfAccs"));
-    const setIdx = dom.els.set_d_h1.dataset.setIdx;
-    const set = setsOfAccs[setIdx];
+    const accounts = JSON.parse(localStorage.getItem("accounts"));
+    const setIdx = accounts.activeSetIdx;
+    const set = accounts.sets[setIdx];
     const accNameSpan = document.createElement("span");
     const accName = set.accs[accIdx].accName;
     const accNameTextNode = document.createTextNode(accName);

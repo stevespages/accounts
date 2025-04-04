@@ -1,10 +1,10 @@
-export function addNewAcc(dom) {
-    const setsOfAccs = JSON.parse(localStorage.getItem("setsOfAccs"));
-    //const set = setsOfAccs[setIdx];
+export function addNewAcc(accName) {
+    const accounts = JSON.parse(localStorage.getItem("accounts"));
+    const setIdx = accounts.activeSetIdx;
     const newAcc = {};
-    newAcc.accName = dom.els.addAcc_dAccName_inp.value;
+    newAcc.accName = accName;
     newAcc.status = "active";
     newAcc.txns = [];
-    setsOfAccs[dom.els.set_d_h1.dataset.setIdx].accs.push(newAcc);
-    localStorage.setItem("setsOfAccs", JSON.stringify(setsOfAccs));
+    accounts.sets[setIdx].accs.push(newAcc);
+    localStorage.setItem("accounts", JSON.stringify(accounts));
 }
