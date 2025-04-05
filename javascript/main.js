@@ -12,6 +12,7 @@ import { cancelTxn } from "./modules/cancel-txn.js";
 import { createAccsFromCsv } from "./modules/create-accs-from-csv.js";
 import { createImportDialog } from "./modules/create-import-dialog.js";
 import { createLookUpColTable } from "./modules/create-look-up-col-table.js";
+import { createTxnsFromCsv } from "./modules/create-txns-from-csv.js";
 import { deleteSet } from "./modules/delete-set.js";
 import { deleteTemporaryCsv } from "./modules/delete-temporary-csv.js";
 import { dom } from "./modules/dom.js";
@@ -121,59 +122,11 @@ dom.els.importCsv_d.addEventListener("click", (event) => {
         createAccsFromCsv(dom, addNewAcc);
         const lookUpColTable = createLookUpColTable(accNameToAccIdx);
         console.log("lookUpColTable", lookUpColTable)
-        //createTxnsFromCsv(lookUpColTable);
-
-        /*
-        accounts.temporaryCsv.forEach((row, idx) => {
-            // accIdxs is an array of the accIdx for each account involved in
-            // transaction. It must include "0" if the unbalanced account has
-            // a non zero value for the transaction
-            const accIdxs = [];
-            // ignore the heading row
-            if (idx === 0) {
-                return;
-            }
-            const txn = {
-                accsAndAmounts: {},
-            };
-            txn.timestamp = Date.now();
-            newHeadings.forEach((heading, headingIdx) => {
-                // ignore null headings according to user
-                if (!heading) {
-                    return;
-                }
-                if (heading.toLowerCase() === "date") {
-                    txn.date = row[headingIdx];
-                    return;
-                }
-                if (heading.toLowerCase() === "description") {
-                    txn.description = row[headingIdx];
-                    return;
-                }
-                let accIdx = getAccIdx(heading);
-                if (!accIdx) {
-                    addNewAcc(dom, heading);
-                }
-                accIdx = getAccIdx(heading);
-                accIdxs.push(accIdx);
-                txn.accsAndAmounts[accIdx] = row[headingIdx];
-            })
-            accounts = JSON.parse(localStorage.getItem("accounts"));
-            const txnsIdx = accounts.sets[setIdx].txns.push(txn) - 1;
-            accIdxs.forEach(accIdx => {
-                accounts.sets[setIdx].accs[accIdx].txns.push(txnsIdx);
-            })
-            */
-            /*
-            txn.forEach(txnAcc => {
-                const accIdx = Object.keys(txnAcc)[0];
-                set.accs[accIdx].txns.push(txnsIdx);
-            })
-            */
-        /*
-        })
-        localStorage.setItem("accounts", JSON.stringify(accounts));
-        */
+        createTxnsFromCsv(lookUpColTable);
+        populateAccsUl(dom);
+        addTotalsToAccsUl(dom);
+        cancelTxn(dom);
+        dom.showDiv(["set_d"]);
     }
 
     if (event.target.id === "import-csv_d-show-csv_btn") {
@@ -198,31 +151,38 @@ dom.els.set_d.addEventListener("click", event => {
         event.target.classList.add("inactive");
         addAccToTxnUl(dom, event.target.dataset.accIdx);
     }
-    if (event.target.id === "set_d-add-acc_btn") {
-        dom.els.addAcc_dAccName_inp.value = "";
-        dom.showDiv(["addAcc_d"]);
-    }
-    if (event.target.id === "set_d-cancel_btn") {
-        cancelSet();
-        dom.showDiv(["allSets_d"]);
-    }
     if (event.target.id === "set_d-cancel-txn_btn") {
         cancelTxn(dom);
-    }
-    if (event.target.id === "set_d-delete_btn") {
-        reallyDeleteSetMssg(dom);
-        dom.showDiv(["deleteSet_d"])
-    }
-    if (event.target.id === "set_d-import-csv_btn") {
-        dom.els.importCsv_dImportCsv_btn.classList.add("hide");
-        dom.showDiv(["importCsv_d"]);
     }
     if (event.target.id === "set_d-ok-txn_btn") {
         processTxn(dom);
         addTotalsToAccsUl(dom);
         cancelTxn(dom);
     }
+    if (event.target.id === "set_d-menu_btn") {
+        dom.showDiv(["setMenu_d"])
+    }
 })
+
+dom.els.setMenu_d.addEventListener("click", event => {
+    if (event.target.id === "set-menu_d-add-acc_btn") {
+        dom.els.addAcc_dAccName_inp.value = "";
+        dom.showDiv(["addAcc_d"]);
+    }
+    if (event.target.id === "set-menu_d-cancel_btn") {
+        cancelSet();
+        dom.showDiv(["set_d"]);
+    }
+    if (event.target.id === "set-menu_d-delete_btn") {
+        reallyDeleteSetMssg(dom);
+        dom.showDiv(["deleteSet_d"])
+    }
+    if (event.target.id === "set-menu_d-import-csv_btn") {
+        dom.els.importCsv_dImportCsv_btn.classList.add("hide");
+        dom.els.importCsv_dHeadings_dl.innerHTML = "";
+        dom.showDiv(["importCsv_d"]);
+    }
+});
 
 dom.els.set_dFilterAccs_inp.addEventListener("input", event => {
     hideFilteredAccLis(event.target.value);

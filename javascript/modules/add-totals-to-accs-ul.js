@@ -10,7 +10,7 @@ export function addTotalsToAccsUl(dom) {
  
         acc.txns.forEach(txnIdx => {
             console.log("txnIdx", txnIdx)
-            accTotal += Number(set.txns[txnIdx].accsAndAmounts[accIdx]);
+            accTotal += Number(set.txns[txnIdx.toString()].accsAndAmounts[accIdx]);
             console.log("accTotal", accTotal)
         })
         accTotalSpans[accIdx].innerHTML = accTotal;

@@ -10,14 +10,6 @@ export function createImportDialog(dom, addCsvInpClasses, accNameExists) {
         headingInp.classList.add("import-csv-heading-inp");
         headingInp.value = heading;
         addCsvInpClasses(headingInp, accNameExists);
-        /*
-        if (heading.toLowerCase() === "date") {
-            headingInp.classList.add("date");
-        }
-        if (heading.toLowerCase() === "description") {
-            headingInp.classList.add("description");
-        }
-        */
         label.append(headingInp);
         const dt = document.createElement("dt");
         dt.append(label);
